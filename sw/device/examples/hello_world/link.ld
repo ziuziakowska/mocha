@@ -39,38 +39,38 @@ PROVIDE(_setup_interrupts = default_setup_interrupts);
 SECTIONS
 {
     .text : {
-        . = ALIGN(4);
+        . = ALIGN(8);
         _vectors_start = .;
         KEEP(*(.vectors))
         _vectors_end = .;
         *(.text)
         *(.text.*)
-        . = ALIGN(4);
+        . = ALIGN(8);
     }  > ram
 
     .rodata : {
-        . = ALIGN(4);
+        . = ALIGN(8);
         /* Small RO data before large RO data */
         *(.srodata)
         *(.srodata.*)
         *(.rodata);
         *(.rodata.*)
-        . = ALIGN(4);
+        . = ALIGN(8);
     } > ram
 
     .data : {
-        . = ALIGN(4);
+        . = ALIGN(8);
         /* Small data before large data */
         *(.sdata)
         *(.sdata.*)
         *(.data);
         *(.data.*)
-        . = ALIGN(4);
+        . = ALIGN(8);
     } > ram
 
     .bss :
     {
-        . = ALIGN(4);
+        . = ALIGN(8);
         _bss_start = .;
         /* Small BSS before large BSS */
         *(.sbss)
@@ -79,7 +79,7 @@ SECTIONS
         *(.bss.*)
         *(COMMON)
         _bss_end = .;
-        . = ALIGN(4);
+        . = ALIGN(8);
     } > ram
     /* Rust dependency */
     _sbss = _bss_start;
@@ -87,9 +87,9 @@ SECTIONS
 
     /* ensure there is enough room for stack */
     .stack (NOLOAD): {
-        . = ALIGN(4);
+        . = ALIGN(8);
         . = . + _min_stack ;
-        . = ALIGN(4);
+        . = ALIGN(8);
         stack = . ;
         _stack = . ;
     } > stack

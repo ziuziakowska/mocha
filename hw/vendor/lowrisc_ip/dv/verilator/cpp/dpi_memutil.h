@@ -31,24 +31,24 @@ enum MemImageType {
 // max_addr_ is the smallest / largest byte offset with valid data.
 class StagedMem {
  public:
-  StagedMem() : min_addr_(~(uint32_t)0), max_addr_(0) {}
+  StagedMem() : min_addr_(~(uint64_t)0), max_addr_(0) {}
 
   // Add a segment to the tracked memory
-  void AddSegment(uint32_t offset, std::vector<uint8_t> &&seg);
+  void AddSegment(uint64_t offset, std::vector<uint8_t> &&seg);
 
   // Glob together the tracked segments, interspersing them with
   // zeros, and return as a single flat array.
   std::vector<uint8_t> GetFlat() const;
 
-  typedef RangedMap<uint32_t, std::vector<uint8_t>> SegMap;
+  typedef RangedMap<uint64_t, std::vector<uint8_t>> SegMap;
 
-  std::pair<uint32_t, uint32_t> GetBounds() const {
+  std::pair<uint64_t, uint64_t> GetBounds() const {
     return std::make_pair(min_addr_, max_addr_);
   }
   const SegMap &GetSegs() const { return segs_; }
 
  private:
-  uint32_t min_addr_, max_addr_;
+  uint64_t min_addr_, max_addr_;
   SegMap segs_;
 };
 
@@ -82,7 +82,7 @@ class DpiMemUtil {
    * Memories must be registered before command arguments are parsed by
    * ParseCommandArgs() in order for them to be known.
    */
-  void RegisterMemoryArea(const std::string &name, uint32_t base,
+  void RegisterMemoryArea(const std::string &name, uint64_t base,
                           const MemArea *mem_area);
 
   /**
@@ -146,11 +146,11 @@ class DpiMemUtil {
   // (which all have the same number of elements). Note that mem_areas_ does
   // not own the objects that it points to.
   std::vector<const MemArea *> mem_areas_;
-  std::vector<uint32_t> base_addrs_;
+  std::vector<uint64_t> base_addrs_;
   std::vector<std::string> names_;
 
   std::map<std::string, size_t> name_to_mem_;
-  RangedMap<uint32_t, size_t> addr_to_mem_;
+  RangedMap<uint64_t, size_t> addr_to_mem_;
 
   // Staging area, loaded by StageElf. The map is keyed by names of memories
   // stored in name_to_mem_. We also ensure that every segment in a StagedMem
@@ -163,8 +163,8 @@ class DpiMemUtil {
    * Find the index of a memory area containing the given segment's addresses.
    * Raises a std::exception if none is found.
    */
-  size_t GetRegionForSegment(const std::string &path, int seg_idx, uint32_t lma,
-                             uint32_t mem_sz) const;
+  size_t GetRegionForSegment(const std::string &path, int seg_idx, uint64_t lma,
+                             uint64_t mem_sz) const;
 };
 
 #endif  // OPENTITAN_HW_DV_VERILATOR_CPP_DPI_MEMUTIL_H_

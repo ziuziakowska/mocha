@@ -1,0 +1,95 @@
+CAPI=2:
+name: "cosmic::cva6cheri"
+description: "CVA6-CHERI core file for COSMIC project."
+
+filesets:
+  files_rtl:
+    depend:
+      - pulp-platform.org::axi
+      - lowrisc:common_cells:all
+      - lowrisc:prim:lfsr
+    files:
+      # Includes.
+      - cva6_cheri/core/include/rvfi_types.svh: {is_include_file: true, include_path: cva6_cheri/core/include}
+      - cva6_cheri/core/include/cvxif_types.svh: {is_include_file: true, include_path: cva6_cheri/core/include}
+      # Packages.
+      - cva6_cheri/core/include/config_pkg.sv
+      - cva6_cheri/core/include/cv64a6_imafdchzcheri_sv39_config_pkg.sv
+      - cva6_cheri/core/include/riscv_pkg.sv
+      - cva6_cheri/core/include/cva6_cheri_pkg.sv
+      - cva6_cheri/core/include/wt_cache_pkg.sv
+      - cva6_cheri/core/include/build_config_pkg.sv
+      - cva6_cheri/core/include/ariane_pkg.sv
+      # CVXIF.
+      - cva6_cheri/core/cvxif_issue_register_commit_if_driver.sv
+      # CVA6.
+      - cva6_cheri/core/cva6.sv
+      - cva6_cheri/core/cva6_rvfi_probes.sv
+      - cva6_cheri/core/alu.sv
+      - cva6_cheri/core/branch_unit.sv
+      - cva6_cheri/core/compressed_decoder.sv
+      - cva6_cheri/core/macro_decoder.sv
+      - cva6_cheri/core/controller.sv
+      - cva6_cheri/core/zcmt_decoder.sv
+      - cva6_cheri/core/csr_buffer.sv
+      - cva6_cheri/core/csr_regfile.sv
+      - cva6_cheri/core/decoder.sv
+      - cva6_cheri/core/ex_stage.sv
+      - cva6_cheri/core/instr_realign.sv
+      - cva6_cheri/core/id_stage.sv
+      - cva6_cheri/core/issue_read_operands.sv
+      - cva6_cheri/core/issue_stage.sv
+      - cva6_cheri/core/load_unit.sv
+      - cva6_cheri/core/load_store_unit.sv
+      - cva6_cheri/core/lsu_bypass.sv
+      - cva6_cheri/core/mult.sv
+      - cva6_cheri/core/multiplier.sv
+      - cva6_cheri/core/cheri_unit.sv
+      - cva6_cheri/core/serdiv.sv
+      - cva6_cheri/core/perf_counters.sv
+      - cva6_cheri/core/ariane_regfile_ff.sv
+      - cva6_cheri/core/ariane_regfile_fpga.sv
+      - cva6_cheri/core/scoreboard.sv
+      - cva6_cheri/core/raw_checker.sv
+      - cva6_cheri/core/store_buffer.sv
+      - cva6_cheri/core/amo_buffer.sv
+      - cva6_cheri/core/store_unit.sv
+      - cva6_cheri/core/commit_stage.sv
+      - cva6_cheri/core/axi_shim.sv
+      - cva6_cheri/core/cva6_accel_first_pass_decoder_stub.sv
+      - cva6_cheri/core/acc_dispatcher.sv
+      - cva6_cheri/core/cva6_fifo_v3.sv
+      - cva6_cheri/core/frontend/btb.sv
+      - cva6_cheri/core/frontend/bht.sv
+      - cva6_cheri/core/frontend/bht2lvl.sv
+      - cva6_cheri/core/frontend/ras.sv
+      - cva6_cheri/core/frontend/instr_scan.sv
+      - cva6_cheri/core/frontend/instr_queue.sv
+      - cva6_cheri/core/frontend/frontend.sv
+      # Cache.
+      - cva6_cheri/core/cache_subsystem/wt_dcache_ctrl.sv
+      - cva6_cheri/core/cache_subsystem/wt_dcache_mem.sv
+      - cva6_cheri/core/cache_subsystem/wt_dcache_missunit.sv
+      - cva6_cheri/core/cache_subsystem/wt_dcache_wbuffer.sv
+      - cva6_cheri/core/cache_subsystem/wt_dcache.sv
+      - cva6_cheri/core/cache_subsystem/cva6_icache.sv
+      - cva6_cheri/core/cache_subsystem/wt_cache_subsystem.sv
+      - cva6_cheri/core/cache_subsystem/wt_axi_adapter.sv
+      - cva6_cheri/common/local/util/tc_sram_wrapper.sv
+      - cva6_cheri/common/local/util/sram.sv
+      - cva6_cheri/common/local/util/sram_cache.sv
+      # Physical memory protection.
+      - cva6_cheri/core/pmp/src/pmp.sv
+      - cva6_cheri/core/pmp/src/pmp_entry.sv
+      - cva6_cheri/core/pmp/src/pmp_data_if.sv
+      # Memory management unit.
+      - cva6_cheri/core/cva6_mmu/cva6_mmu.sv
+      - cva6_cheri/core/cva6_mmu/cva6_ptw.sv
+      - cva6_cheri/core/cva6_mmu/cva6_tlb.sv
+      - cva6_cheri/core/cva6_mmu/cva6_shared_tlb.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+      - files_rtl

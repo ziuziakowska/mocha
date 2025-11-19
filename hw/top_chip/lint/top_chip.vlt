@@ -1,0 +1,61 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+// Waivers for for Mocha top for Verilator tool
+
+`verilator_config
+
+// Initialising all RVFI signals to zero is OK in this case.
+lint_off -rule WIDTHCONCAT -file "*/cva6_cheri/core/cva6_rvfi_probes.sv" -match "*More than a 8k bit replication is probably wrong: 8461"
+
+// This is only when data width is equal to one.
+lint_off -rule UNSIGNED -file "*/rtl/rr_arb_tree.sv" -match "*Comparison is constant due to unsigned arithmetic"
+
+// Expanding the user bits to a 64-bit read is fine in this case.
+lint_off -rule SELRANGE -file "*/cva6_cheri/core/cache_subsystem/cva6_icache.sv" -match "*Extracting 64 bits from only 4 bit number"
+
+// Probably good to change this eventually but not required.
+lint_off -rule SYMRSVDWORD -file "*/cva6_cheri/core/cva6.sv" -match "*register*"
+
+// These are gated by if statements.
+lint_off -rule SELRANGE -file "*/cva6_cheri/core/issue_read_operands.sv"
+
+// TODO figure out whether to rewrite these constant comparisons.
+lint_off -rule CMPCONST -file "*/cva6_cheri/core/raw_checker.sv" -match "*due to limited range"
+
+// TODO these are quite complicated case statements, ignoring for now.
+lint_off -rule CASEINCOMPLETE -file "*/axi_dw_downsizer.sv"
+
+// As far as I can tell adding these default values is not useful.
+lint_off -rule LATCH -file "*/cva6_cheri/core/cheri_unit.sv"
+lint_off -rule LATCH -file "*/cva6_cheri/core/csr_regfile.sv"
+lint_off -rule LATCH -file "*/cva6_cheri/core/cva6_fifo_v3.sv"
+lint_off -rule LATCH -file "*/cva6_cheri/core/cva6_mmu/cva6_ptw.sv"
+lint_off -rule LATCH -file "*/cva6_cheri/core/cva6_mmu/cva6_tlb.sv"
+lint_off -rule LATCH -file "*/cva6_cheri/core/load_unit.sv" -match "*result_cap*"
+lint_off -rule LATCH -file "*/cva6_cheri/core/scoreboard.sv" -match "*new_sbe*"
+
+// These warnings are deprecated and difficult to avoid in memory.
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cheri_unit.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cva6_mmu/cva6_mmu.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/decoder.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/frontend/instr_queue.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/load_store_unit.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/load_unit.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/scoreboard.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cache_subsystem/wt_axi_adapter.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cache_subsystem/wt_cache_subsystem.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cache_subsystem/wt_dcache_buffer.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cache_subsystem/wt_dcache_ctrl.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cache_subsystem/wt_dcache_mem.sv"
+lint_off -rule UNOPTFLAT -file "*/cva6_cheri/core/cache_subsystem/wt_dcache_wbuffer.sv"
+lint_off -rule UNOPTFLAT -file "*/rtl/lzc.sv"
+lint_off -rule UNOPTFLAT -file "*/rtl/stream_mux.sv"
+lint_off -rule UNOPTFLAT -file "*/src/axi_to_detailed_mem.sv"
+lint_off -rule UNOPTFLAT -file "*/rtl/id_queue.sv"
+lint_off -rule UNOPTFLAT -file "*/rtl/prim_fifo_sync.sv"
+lint_off -rule UNOPTFLAT -file "*/src/axi_dw_downsizer.sv"
+lint_off -rule UNOPTFLAT -file "*/src/axi_atop_filter.sv"
+lint_off -rule UNOPTFLAT -file "*/rtl/spill_register.sv"
+lint_off -rule UNOPTFLAT -file "*/rr_arb_tree.sv"
