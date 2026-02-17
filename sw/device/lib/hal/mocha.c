@@ -98,7 +98,7 @@ spi_device_t mocha_system_spi_device(void)
 timer_t mocha_system_timer(void)
 {
 #if defined(__riscv_zcherihybrid)
-    return (timer_t)create_mmio_capability(timer_base, 0x120u);
+    return (timer_t)create_mmio_capability(timer_base, sizeof(struct timer_memory_layout));
 #else /* !defined(__riscv_zcherihybrid) */
     return (timer_t)timer_base;
 #endif /* defined(__riscv_zcherihybrid) */
@@ -130,3 +130,13 @@ void *mocha_system_dv_test_status(void)
     return (void *)dv_test_status_base;
 #endif /* defined(__riscv_zcherihybrid) */
 }
+
+inline uint64_t us_to_cycles(uint64_t us)
+{
+    return us * (SYSCLK_FREQ / 1000000u);
+};
+
+inline uint64_t cycles_to_us(uint64_t cycles)
+{
+    return cycles / (SYSCLK_FREQ / 1000000u);
+};

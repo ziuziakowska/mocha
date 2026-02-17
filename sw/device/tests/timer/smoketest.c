@@ -16,16 +16,15 @@ bool accuracy_test(timer_t timer)
     bool has_intr_before_expire;
     bool has_intr_after_expire;
 
-    const uint64_t duration_steps = 100;
-    const uint64_t tolerance_steps = 10;
+    const uint64_t duration_us = 100;
+    const uint64_t tolerance_us = 10;
 
-    const uint64_t min_cycle_diff = (duration_steps - tolerance_steps) * (SYSCLK_FREQ / 1000000);
-    const uint64_t max_cycle_diff = (duration_steps + tolerance_steps) * (SYSCLK_FREQ / 1000000);
+    const uint64_t min_cycle_diff = us_to_cycles(duration_us - tolerance_us);
+    const uint64_t max_cycle_diff = us_to_cycles(duration_us + tolerance_us);
 
     timer_init(timer);
-    timer_set_prescale_step(timer, (SYSCLK_FREQ / 1000000) - 1, 1); // 1 tick/us
-    timer_set_compare(timer, timer_get_value(timer) + duration_steps);
-    timer_clear_interrupt(timer);
+    timer_schedule_in_us(timer, duration_us);
+    timer_interrupt_clear(timer);
 
     __asm__ volatile("csrr %0, cycle\n\t" : "=r"(start_cycle));
 
@@ -41,7 +40,7 @@ bool accuracy_test(timer_t timer)
         }
     }
 
-    has_intr_before_expire = timer_has_interrupt(timer);
+    has_intr_before_expire = timer_interrupt_pending(timer);
 
     while (1) {
         __asm__ volatile("csrr %0, cycle\n\t" : "=r"(current_cycle));
@@ -50,7 +49,7 @@ bool accuracy_test(timer_t timer)
         }
     }
 
-    has_intr_after_expire = timer_has_interrupt(timer);
+    has_intr_after_expire = timer_interrupt_pending(timer);
 
     return (!has_intr_before_expire && has_intr_after_expire);
 }
@@ -62,20 +61,18 @@ bool timer_irq_test(timer_t timer)
     bool has_mtip_after_expire;
 
     const uint64_t MTIP_MASK = (1 << 7);
-    const uint64_t duration_steps = 5;
+    const uint64_t duration_us = 5;
 
     timer_init(timer);
-    timer_set_prescale_step(timer, (SYSCLK_FREQ / 1000000) - 1, 1); // 1 tick/us
-    timer_set_compare(timer, timer_get_value(timer) + duration_steps);
-    timer_clear_interrupt(timer);
-    timer_enable_interrupt(timer);
-
+    timer_schedule_in_us(timer, duration_us);
+    timer_interrupt_clear(timer);
+    timer_interrupt_enable_set(timer, true);
     timer_enable(timer);
 
     __asm__ volatile("csrr %0, mip\n\t" : "=r"(mip));
     has_mtip_before_expire = ((mip & MTIP_MASK) != 0);
 
-    while (!timer_has_interrupt(timer)) {
+    while (!timer_interrupt_pending(timer)) {
     }
 
     __asm__ volatile("csrr %0, mip\n\t" : "=r"(mip));

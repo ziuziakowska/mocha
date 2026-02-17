@@ -28,14 +28,13 @@ int main(void)
     timer_init(timer);
     spi_device_init(spi_device);
 
-    timer_set_prescale_step(timer, (SYSCLK_FREQ / 1000000) - 1, 1); // 1 tick/us
     timer_enable(timer);
 
     uart_puts(uart, "Hello CHERI Mocha!\n");
 
     // Print every 100us
     for (int i = 0; i < 4; ++i) {
-        timer_busy_sleep(timer, 100);
+        timer_busy_sleep_us(timer, 100);
 
         uart_puts(uart, "timer 100us\n");
         gpio_write_pin(gpio, i, 1); // turn on LEDs in sequence

@@ -16,7 +16,7 @@
 #include "hal/uart.h"
 
 /* System clock frequency (50 MHz) */
-#define SYSCLK_FREQ (50000000)
+#define SYSCLK_FREQ (50000000u)
 /* System clock period in nanoseconds (20 ns) */
 #define SYSCLK_NS (20)
 
@@ -34,3 +34,6 @@ plic_t mocha_system_plic(void);
 void *mocha_system_dram(void);
 
 void *mocha_system_dv_test_status(void);
+
+uint64_t us_to_cycles(uint64_t us);
+uint64_t cycles_to_us(uint64_t cycles);

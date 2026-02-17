@@ -4,10 +4,9 @@
 
 #include "hal/mocha.h"
 #include "hal/timer.h"
-#include "hal/uart.h"
 #include <stdbool.h>
 
-timer_t timer = NULL;
+volatile timer_t timer = NULL;
 volatile bool interrupt_handled = false;
 
 bool test_main(uart_t console)
@@ -27,14 +26,13 @@ bool test_main(uart_t console)
     /* initialise the timer */
     timer = mocha_system_timer();
     timer_init(timer);
-    timer_set_prescale_step(timer, (SYSCLK_FREQ / 1000000) - 1, 1); /* 1 tick/us */
-    timer_enable_interrupt(timer);
     timer_enable(timer);
 
     for (size_t i = 0; i < 10; i++) {
         /* schedule an interrupt 100us from now */
         interrupt_handled = false;
-        timer_set_compare(timer, timer_get_value(timer) + 100);
+        timer_schedule_in_us(timer, 100);
+        timer_interrupt_enable_set(timer, true);
 
         do {
             /* disable interrupts globally */
@@ -60,11 +58,9 @@ bool test_main(uart_t console)
 bool test_interrupt_handler(size_t irq)
 {
     if (irq == 7) {
-        /* machine mode timer interrupt */
-        /* set next timer interrupt to be infinitely far into the future */
-        timer_set_compare(timer, ~(0));
-        /* clear the timer interrupt */
-        timer_clear_interrupt(timer);
+        /* machine mode timer interrupt, disable the interrupt and clear it */
+        timer_interrupt_enable_set(timer, false);
+        timer_interrupt_clear(timer);
         interrupt_handled = true;
         return true;
     }
