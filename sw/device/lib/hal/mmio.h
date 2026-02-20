@@ -17,3 +17,6 @@
 #define DEV_READ16(addr)       (*((volatile uint16_t *)(addr)))
 #define DEV_WRITE64(addr, val) (*((volatile uint64_t *)(addr)) = (val))
 #define DEV_READ64(addr)       (*((volatile uint64_t *)(addr)))
+
+#define volatile_read(reg)       (*((volatile __typeof((reg)) *)&(reg)))
+#define volatile_write(reg, val) (*((volatile __typeof((reg)) *)&(reg)) = (__typeof((reg)))(val))
