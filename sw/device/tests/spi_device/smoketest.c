@@ -112,20 +112,19 @@ bool reg_test(spi_device_t spi_device)
 
 bool machine_irq_test(spi_device_t spi_device, plic_t plic)
 {
-    uint8_t intr_id;
+    uint32_t intr_id;
 
     const int MIP_RD_RETRY_COUNT = 20;
-    const int SPI_DEVICE_INTR_ID = 7;
     const uint64_t MEIP_MASK = (1 << 11);
 
     plic_init(plic);
-    plic_interrupt_priority_set(plic, SPI_DEVICE_INTR_ID, 3);
+    plic_interrupt_priority_set(plic, mocha_system_irq_spi_device, 3);
     plic_machine_priority_threshold_set(plic, 0);
 
     spi_device_interrupt_disable_all(spi_device);
     spi_device_interrupt_enable(spi_device, SPI_DEVICE_INTR_UPLOAD_PAYLOAD_OVERFLOW);
 
-    plic_machine_interrupt_enable(plic, SPI_DEVICE_INTR_ID);
+    plic_machine_interrupt_enable(plic, mocha_system_irq_spi_device);
 
     // Check that mip MEIP is clear
     if ((csr_mip_get() & MEIP_MASK) != 0) {
@@ -157,20 +156,19 @@ bool machine_irq_test(spi_device_t spi_device, plic_t plic)
 
 bool supervisor_irq_test(spi_device_t spi_device, plic_t plic)
 {
-    uint8_t intr_id;
+    uint32_t intr_id;
 
     const int MIP_RD_RETRY_COUNT = 20;
-    const int SPI_DEVICE_INTR_ID = 7;
     const uint64_t SEIP_MASK = (1 << 9);
 
     plic_init(plic);
-    plic_interrupt_priority_set(plic, SPI_DEVICE_INTR_ID, 3);
+    plic_interrupt_priority_set(plic, mocha_system_irq_spi_device, 3);
     plic_supervisor_priority_threshold_set(plic, 0);
 
     spi_device_interrupt_disable_all(spi_device);
     spi_device_interrupt_enable(spi_device, SPI_DEVICE_INTR_READBUF_FLIP);
 
-    plic_supervisor_interrupt_enable(plic, SPI_DEVICE_INTR_ID);
+    plic_supervisor_interrupt_enable(plic, mocha_system_irq_spi_device);
 
     // Check that mip SEIP is clear
     if ((csr_mip_get() & SEIP_MASK) != 0) {

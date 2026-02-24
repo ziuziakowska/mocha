@@ -20,27 +20,27 @@ bool reg_test(plic_t plic)
     plic_init(plic);
 
     plic_interrupt_priority_set(plic, 4, 2);
-    if ((plic_interrupt_priority_get(plic, 4) & PLIC_PRIO_MASK) != 2) {
+    if ((plic_interrupt_priority_get(plic, 4) != 2)) {
         return false;
     }
 
-    plic_machine_interrupt_enable(plic, 22);
-    if (!plic_machine_interrupt_enable_get(plic, 22)) {
+    plic_machine_interrupt_enable(plic, 1 << 22);
+    if (!(plic_machine_interrupt_enable_get(plic) & (1 << 22))) {
         return false;
     }
 
-    plic_machine_interrupt_disable(plic, 22);
-    if (plic_machine_interrupt_enable_get(plic, 22)) {
+    plic_machine_interrupt_disable(plic, 1 << 22);
+    if (plic_machine_interrupt_enable_get(plic) & (1 << 22)) {
         return false;
     }
 
-    plic_supervisor_interrupt_enable(plic, 13);
-    if (!plic_supervisor_interrupt_enable_get(plic, 13)) {
+    plic_supervisor_interrupt_enable(plic, 1 << 13);
+    if (!(plic_supervisor_interrupt_enable_get(plic) & (1 << 13))) {
         return false;
     }
 
-    plic_supervisor_interrupt_disable(plic, 13);
-    if (plic_supervisor_interrupt_enable_get(plic, 13)) {
+    plic_supervisor_interrupt_disable(plic, 1 << 13);
+    if (plic_supervisor_interrupt_enable_get(plic) & (1 << 13)) {
         return false;
     }
 
@@ -49,19 +49,18 @@ bool reg_test(plic_t plic)
 
 bool uart_machine_irq_test(plic_t plic, uart_t uart)
 {
-    uint8_t intr_id;
+    uint32_t intr_id;
 
     const int MIP_RD_RETRY_COUNT = 20;
-    const int UART_INTR_ID = 8;
     const uint64_t MEIP_MASK = (1 << 11);
 
     plic_init(plic);
-    plic_interrupt_priority_set(plic, UART_INTR_ID, 3);
+    plic_interrupt_priority_set(plic, mocha_system_irq_uart, 3);
     plic_machine_priority_threshold_set(plic, 0);
 
     uart_interrupt_enable_set(uart, uart_intr_rx_frame_err);
 
-    plic_machine_interrupt_enable(plic, UART_INTR_ID);
+    plic_machine_interrupt_enable(plic, mocha_system_irq_uart);
 
     // Check that mip MEIP is clear
     if ((csr_mip_get() & MEIP_MASK) != 0) {
@@ -93,19 +92,18 @@ bool uart_machine_irq_test(plic_t plic, uart_t uart)
 
 bool uart_supervisor_irq_test(plic_t plic, uart_t uart)
 {
-    uint8_t intr_id;
+    uint32_t intr_id;
 
     const int MIP_RD_RETRY_COUNT = 20;
-    const int UART_INTR_ID = 8;
     const uint64_t SEIP_MASK = (1 << 9);
 
     plic_init(plic);
-    plic_interrupt_priority_set(plic, UART_INTR_ID, 3);
+    plic_interrupt_priority_set(plic, mocha_system_irq_uart, 3);
     plic_supervisor_priority_threshold_set(plic, 0);
 
     uart_interrupt_enable_set(uart, uart_intr_rx_timeout);
 
-    plic_supervisor_interrupt_enable(plic, UART_INTR_ID);
+    plic_supervisor_interrupt_enable(plic, mocha_system_irq_uart);
 
     // Check that mip SEIP is clear
     if ((csr_mip_get() & SEIP_MASK) != 0) {

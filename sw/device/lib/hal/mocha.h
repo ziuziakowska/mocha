@@ -22,6 +22,11 @@
 
 static const uintptr_t dram_base = 0x80000000ul;
 
+enum mocha_system_irq : uint32_t {
+    mocha_system_irq_spi_device = (1u << 7),
+    mocha_system_irq_uart = (1u << 8),
+};
+
 /* In order of memory map. */
 gpio_t mocha_system_gpio(void);
 clkmgr_t mocha_system_clkmgr(void);
