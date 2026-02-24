@@ -7,6 +7,7 @@
 #pragma once
 
 #include "hal/clkmgr.h"
+#include "hal/dv_test_status.h"
 #include "hal/gpio.h"
 #include "hal/i2c.h"
 #include "hal/plic.h"
@@ -36,9 +37,9 @@ i2c_t mocha_system_i2c(void);
 spi_device_t mocha_system_spi_device(void);
 timer_t mocha_system_timer(void);
 plic_t mocha_system_plic(void);
-void *mocha_system_dram(void);
+dv_test_status_t mocha_system_dv_test_status(void);
 
-void *mocha_system_dv_test_status(void);
+void *mocha_system_dram(void);
 
 uint64_t us_to_cycles(uint64_t us);
 uint64_t cycles_to_us(uint64_t cycles);

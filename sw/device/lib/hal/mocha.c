@@ -122,12 +122,13 @@ void *mocha_system_dram(void)
 #endif /* defined(__riscv_zcherihybrid) */
 }
 
-void *mocha_system_dv_test_status(void)
+dv_test_status_t mocha_system_dv_test_status(void)
 {
 #if defined(__riscv_zcherihybrid)
-    return create_mmio_capability(dv_test_status_base, 0x100u);
+    return (dv_test_status_t)create_mmio_capability(dv_test_status_base,
+                                                    sizeof(struct dv_test_status_memory_layout));
 #else /* !defined(__riscv_zcherihybrid) */
-    return (void *)dv_test_status_base;
+    return (dv_test_status_t)dv_test_status_base;
 #endif /* defined(__riscv_zcherihybrid) */
 }
 
