@@ -27,6 +27,7 @@ filesets:
       - lowrisc:common_cells:all
       - cosmic::cva6cheri
       - cosmic::tagctrl
+      - cosmic:pulp:axi_riscv_atomics
     files:
       - rtl/mem_downsizer.sv
       - rtl/axi_sram.sv

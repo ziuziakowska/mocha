@@ -164,6 +164,10 @@ module top_chip_system #(
   top_pkg::axi_resp_t [xbar_cfg.NoSlvPorts-1:0] xbar_host_resp;
   top_pkg::axi_req_t  [xbar_cfg.NoMstPorts-1:0] xbar_device_req;
   top_pkg::axi_resp_t [xbar_cfg.NoMstPorts-1:0] xbar_device_resp;
+  top_pkg::axi_req_t                            dram_post_atomics_req;
+  top_pkg::axi_resp_t                           dram_post_atomics_resp;
+  top_pkg::axi_req_t                            dram_cut_req;
+  top_pkg::axi_resp_t                           dram_cut_resp;
   top_pkg::axi_req_t                            tag_controller_isolated_req;
   top_pkg::axi_resp_t                           tag_controller_isolated_resp;
 
@@ -870,6 +874,59 @@ module top_chip_system #(
     (|rstmgr_resets.rst_por_n) | (|rstmgr_resets.rst_spi_device_n) | (|rstmgr_resets.rst_spi_host_n) | (|rstmgr_resets.rst_i2c_n) |
     (|rstmgr_rst_en);
 
+  // Combine response and request between crossbar and atomics wrapper.
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( top_pkg::AxiAddrWidth ),
+    .AXI_DATA_WIDTH ( top_pkg::AxiDataWidth ),
+    .AXI_ID_WIDTH   ( top_pkg::AxiIdWidth   ),
+    .AXI_USER_WIDTH ( top_pkg::AxiUserWidth )
+  ) xbar_device_dram();
+  `AXI_ASSIGN_FROM_REQ(xbar_device_dram, xbar_device_req[top_pkg::DRAM])
+  `AXI_ASSIGN_TO_RESP(xbar_device_resp[top_pkg::DRAM], xbar_device_dram)
+
+  // Split response and request between atomics wrapper and cut.
+  AXI_BUS #(
+    .AXI_ADDR_WIDTH ( top_pkg::AxiAddrWidth ),
+    .AXI_DATA_WIDTH ( top_pkg::AxiDataWidth ),
+    .AXI_ID_WIDTH   ( top_pkg::AxiIdWidth   ),
+    .AXI_USER_WIDTH ( top_pkg::AxiUserWidth )
+  ) dram_post_atomics();
+  `AXI_ASSIGN_TO_REQ(dram_post_atomics_req, dram_post_atomics)
+  `AXI_ASSIGN_FROM_RESP(dram_post_atomics, dram_post_atomics_resp)
+
+  // AXI atomics wrapper to handle swaps before going to the tag controller.
+  axi_riscv_atomics_wrap #(
+    .AXI_ADDR_WIDTH     ( top_pkg::AxiAddrWidth ),
+    .AXI_DATA_WIDTH     ( top_pkg::AxiDataWidth ),
+    .AXI_ID_WIDTH       ( top_pkg::AxiIdWidth   ),
+    .AXI_USER_WIDTH     ( top_pkg::AxiUserWidth ),
+    .AXI_MAX_WRITE_TXNS ( 1                     ),
+    .RISCV_WORD_WIDTH   ( 64                    )
+  ) u_axi_riscv_atomics (
+    .clk_i  (clkmgr_clocks.clk_main_infra),
+    .rst_ni (rstmgr_resets.rst_main_n[rstmgr_pkg::Domain0Sel]),
+    .slv    (xbar_device_dram),
+    .mst    (dram_post_atomics)
+  );
+
+  // Cut combinatorial path between atomics and isolation.
+  axi_cut #(
+    .aw_chan_t  ( top_pkg::axi_aw_chan_t ),
+    .w_chan_t   ( top_pkg::axi_w_chan_t  ),
+    .b_chan_t   ( top_pkg::axi_b_chan_t  ),
+    .ar_chan_t  ( top_pkg::axi_ar_chan_t ),
+    .r_chan_t   ( top_pkg::axi_r_chan_t  ),
+    .axi_req_t  ( top_pkg::axi_req_t     ),
+    .axi_resp_t ( top_pkg::axi_resp_t    )
+  ) u_axi_cut (
+    .clk_i      (clkmgr_clocks.clk_main_infra),
+    .rst_ni     (rstmgr_resets.rst_main_n[rstmgr_pkg::Domain0Sel]),
+    .slv_req_i  (dram_post_atomics_req),
+    .slv_resp_o (dram_post_atomics_resp),
+    .mst_req_o  (dram_cut_req),
+    .mst_resp_i (dram_cut_resp)
+  );
+
   // AXI Isolator for tag controller
   axi_isolate #(
     .TerminateTransaction ( 1'b0                  ),
@@ -883,8 +940,8 @@ module top_chip_system #(
   ) u_tag_controller_isolate (
     .clk_i      (clkmgr_clocks.clk_main_infra),
     .rst_ni     (rstmgr_resets.rst_main_n[rstmgr_pkg::Domain0Sel]),
-    .slv_req_i  (xbar_device_req[top_pkg::DRAM]),
-    .slv_resp_o (xbar_device_resp[top_pkg::DRAM]),
+    .slv_req_i  (dram_cut_req),
+    .slv_resp_o (dram_cut_resp),
     .mst_req_o  (tag_controller_isolated_req),
     .mst_resp_i (tag_controller_isolated_resp),
     .isolate_i  (tag_controller_isolate | tag_controller_isolate_reg),
@@ -892,8 +949,8 @@ module top_chip_system #(
   );
 
   // Tag controller isolation logic
-  assign tag_controller_isolate = (xbar_device_req[top_pkg::DRAM].ar_valid && xbar_device_resp[top_pkg::DRAM].ar_ready) ||
-                                  (xbar_device_req[top_pkg::DRAM].aw_valid && xbar_device_resp[top_pkg::DRAM].aw_ready);
+  assign tag_controller_isolate = (dram_cut_req.ar_valid && dram_cut_resp.ar_ready) ||
+                                  (dram_cut_req.aw_valid && dram_cut_resp.aw_ready);
 
   always_ff @(posedge clkmgr_clocks.clk_main_infra or negedge rstmgr_resets.rst_main_n[rstmgr_pkg::Domain0Sel]) begin
     if (!rstmgr_resets.rst_main_n[rstmgr_pkg::Domain0Sel]) tag_controller_isolate_reg <= 1'b0;
