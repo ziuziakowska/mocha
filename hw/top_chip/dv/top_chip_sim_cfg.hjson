@@ -117,6 +117,18 @@
       run_opts: ["+ChipMemSRAM_image_file={run_dir}/spi_device_smoketest_cheri_bare.vmem"]
     }
     {
+      name: spi_host_smoke
+      uvm_test_seq: top_chip_dv_base_vseq
+      sw_images: ["spi_host_smoketest_vanilla_bare:5"]
+      run_opts: ["+ChipMemSRAM_image_file={run_dir}/spi_host_smoketest_vanilla_bare.vmem"]
+    }
+    {
+      name: spi_host_smoke_cheri
+      uvm_test_seq: top_chip_dv_base_vseq
+      sw_images: ["spi_host_smoketest_cheri_bare:5"]
+      run_opts: ["+ChipMemSRAM_image_file={run_dir}/spi_host_smoketest_cheri_bare.vmem"]
+    }
+    {
       name: i2c_host_tx_rx
       uvm_test_seq: top_chip_dv_i2c_host_tx_rx_vseq
       sw_images: ["i2c_host_tx_rx_test_vanilla_bare:5"]
@@ -195,6 +207,8 @@
         "test_framework_exception_test_cheri",
         "spi_device_smoke",
         "spi_device_smoke_cheri",
+        "spi_host_smoke",
+        "spi_host_smoke_cheri",
         "gpio_smoke",
         "mailbox_smoke",
         "mailbox_smoke_cheri",

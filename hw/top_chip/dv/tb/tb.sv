@@ -26,6 +26,9 @@ module tb;
   wire peri_clk;
   wire peri_rst_n;
 
+  logic [3:0] spi_host_sd;
+  logic [3:0] spi_host_sd_en;
+
   // ------ Interfaces ------
   clk_rst_if sys_clk_if(.clk(clk), .rst_n(rst_n));
   clk_rst_if peri_clk_if(.clk(peri_clk), .rst_n(peri_rst_n));
@@ -64,6 +67,20 @@ module tb;
     .spi_device_sd_en_o   (                 ),
     .spi_device_sd_i      (4'hF             ),
     .spi_device_tpm_csb_i (1'b0             ),
+    // SPI host.
+    .spi_host_sck_o       (                 ),
+    .spi_host_sck_en_o    (                 ),
+    .spi_host_csb_o       (                 ),
+    .spi_host_csb_en_o    (                 ),
+    .spi_host_sd_o        (spi_host_sd      ),
+    .spi_host_sd_en_o     (spi_host_sd_en   ),
+    // Mapping output 0 to input 1 because legacy SPI does not allow
+    // bi-directional wires.
+    // This only works in standard mode where sd_o[0]=COPI and
+    // sd_i[1]=CIPO.
+    .spi_host_sd_i        ({2'b0,
+                            spi_host_sd_en[0] ? spi_host_sd[0] : 1'b0,
+                            1'b0           }),
     // DRAM.
     .dram_req_o           (dram_req         ),
     .dram_resp_i          (dram_resp        )
