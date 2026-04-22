@@ -84,6 +84,7 @@
         uv
         pythonEnv
         verilator
+        verible
         srecord
         d2
       ];
