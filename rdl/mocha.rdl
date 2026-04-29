@@ -36,6 +36,10 @@ addrmap top_mocha {
 
   reserved ROM_CONTROL @ 0x4005_0000;
 
+  reserved ENTROPY_SOURCE @ 0x4006_0000;
+
+  reserved KMAC @ 0x4007_0000;
+
   uart UART[1] @ 0x4100_0000 += 0x10000;
 
   reserved I2C @ 0x4200_0000;
