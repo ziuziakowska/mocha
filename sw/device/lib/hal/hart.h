@@ -14,9 +14,9 @@
 enum [[clang::flag_enum]] interrupt : unsigned long {
     interrupt_supervisor_software = (1u << 1),
     interrupt_machine_software = (1u << 3),
-    interrupt_software_timer = (1u << 5),
+    interrupt_supervisor_timer = (1u << 5),
     interrupt_machine_timer = (1u << 7),
-    interrupt_software_external = (1u << 9),
+    interrupt_supervisor_external = (1u << 9),
     interrupt_machine_external = (1u << 11),
 };
 

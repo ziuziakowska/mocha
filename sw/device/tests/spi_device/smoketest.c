@@ -165,7 +165,7 @@ bool supervisor_irq_test(spi_device_t spi_device, plic_t plic)
     plic_supervisor_interrupt_enable_set(plic, mocha_system_irq_spi_device);
 
     // Check that mip SEIP is clear
-    if (hart_interrupt_any_pending(interrupt_software_external)) {
+    if (hart_interrupt_any_pending(interrupt_supervisor_external)) {
         return false;
     }
 
@@ -173,12 +173,12 @@ bool supervisor_irq_test(spi_device_t spi_device, plic_t plic)
 
     // Check that mip SEIP is set following the triggered interrupt
     for (size_t i = 0; i < mip_read_retry_count; i++) {
-        if (hart_interrupt_any_pending(interrupt_software_external)) {
+        if (hart_interrupt_any_pending(interrupt_supervisor_external)) {
             break;
         }
     }
 
-    if (!hart_interrupt_any_pending(interrupt_software_external)) {
+    if (!hart_interrupt_any_pending(interrupt_supervisor_external)) {
         return false;
     }
 
@@ -187,7 +187,7 @@ bool supervisor_irq_test(spi_device_t spi_device, plic_t plic)
     plic_supervisor_interrupt_complete(plic, intr_id);
 
     // Check that mip SEIP is clear
-    if (hart_interrupt_any_pending(interrupt_software_external)) {
+    if (hart_interrupt_any_pending(interrupt_supervisor_external)) {
         return false;
     }
 
