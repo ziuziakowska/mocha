@@ -42,6 +42,13 @@
         compatible = "simple-bus";
         ranges;
 
+        gpio@40000000 {
+            compatible = "lowrisc,opentitan-gpio-1.0.0";
+            reg = <0x0 0x40000000 0x0 0x48>;
+            gpio-controller;
+            ngpios = <32>;
+        };
+
         serial@41000000 {
             compatible = "lowrisc,opentitan-uart-1.0.0";
             reg = <0x0 0x41000000 0x0 0x30>;
