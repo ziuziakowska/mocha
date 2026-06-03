@@ -58,6 +58,8 @@ COMMANDS: list[list[str]] = [
     ],
     # documentation
     ["d2", "doc/img/mocha.d2"],
+    # vendor OpenTitan before doing the IP generation because patches might change the template
+    ["util/vendor.py", "hw/vendor/lowrisc_ip.vendor.hjson"],
     # crossbar generator
     [
         "hw/vendor/lowrisc_ip/util/tlgen.py",
@@ -143,7 +145,6 @@ COMMANDS: list[list[str]] = [
     ["util/vendor.py", "hw/vendor/cva6_cheri.vendor.hjson"],
     ["util/vendor.py", "hw/vendor/hpdcache.vendor.hjson"],
     ["util/vendor.py", "hw/vendor/ethernet.vendor.hjson"],
-    ["util/vendor.py", "hw/vendor/lowrisc_ip.vendor.hjson"],
     ["util/vendor.py", "hw/vendor/pulp_axi.vendor.hjson"],
     ["util/vendor.py", "hw/vendor/pulp_axi_llc.vendor.hjson"],
     ["util/vendor.py", "hw/vendor/pulp_register_interface.vendor.hjson"],
