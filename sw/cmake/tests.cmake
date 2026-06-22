@@ -12,9 +12,10 @@ set(
 )
 
 # for a given executable, create a raw binary (.bin), verilog memory (.vmem),
-# and disassembly output for debugging (.dump).
+# and disassembly output for debugging (.dump), and add the first two to the
+# given component.
 function(mocha_add_executable_artefacts)
-    set(one_value_args NAME)
+    set(one_value_args NAME TYPE)
     cmake_parse_arguments(arg "" "${one_value_args}" "" ${ARGN})
 
     add_custom_command(
@@ -28,9 +29,17 @@ function(mocha_add_executable_artefacts)
         VERBATIM
     )
 
-    install(TARGETS ${arg_NAME} DESTINATION . COMPONENT ${arg_NAME})
-    install(FILES "$<TARGET_FILE:${arg_NAME}>.vmem" DESTINATION . COMPONENT ${arg_NAME})
-    install(FILES "$<TARGET_FILE:${arg_NAME}>.bin" DESTINATION . COMPONENT ${arg_NAME})
+    if(arg_TYPE)
+        set(comp "${arg_TYPE}")
+        set(dest "${arg_TYPE}")
+    else()
+        set(comp "${arg_NAME}")
+        set(dest ".")
+    endif()
+
+    install(TARGETS ${arg_NAME} DESTINATION ${dest} COMPONENT ${comp})
+    install(FILES "$<TARGET_FILE:${arg_NAME}>.vmem" DESTINATION ${dest} COMPONENT ${comp})
+    install(FILES "$<TARGET_FILE:${arg_NAME}>.bin" DESTINATION ${dest} COMPONENT ${comp})
 endfunction()
 
 # for a given executable, add a test that runs the executable
@@ -54,13 +63,11 @@ function(mocha_add_verilator_test)
         COMMAND ${PROJECT_SOURCE_DIR}/../util/verilator_runner.sh -r $<TARGET_FILE:${arg_ROM}>_scrambled.vmem -E ${arg_NAME}
     )
     set_tests_properties(${TEST} PROPERTIES TIMEOUT ${arg_TIMEOUT})
-
 endfunction()
 
 function(mocha_add_fpga_test)
     set(one_value_args NAME TIMEOUT)
     cmake_parse_arguments(arg "" "${one_value_args}" "" ${ARGN})
-
 
     if(NOT arg_TIMEOUT)
         set(arg_TIMEOUT 15)  # default
@@ -101,7 +108,7 @@ function(mocha_add_test)
         target_link_options(${NAME} PUBLIC
           "-Tmocha_dram.ld" "-L${LDS_DIR}"
         )
-
+        add_dependencies(tests ${NAME})
         # create artefacts
         mocha_add_executable_artefacts(NAME ${NAME})
 
@@ -115,6 +122,7 @@ function(mocha_add_test)
             target_link_options(${NAME}_sram PUBLIC
               "-Tmocha_sram.ld" "-L${LDS_DIR}"
             )
+            add_dependencies(tests ${NAME}_sram)
             mocha_add_executable_artefacts(NAME ${NAME}_sram)
         endif()
 

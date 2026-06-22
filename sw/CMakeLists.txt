@@ -17,6 +17,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(ExternalProject)
 
+# Custom target that represents boot related artefacts.
+# E.g Boot ROM, firmware (OpenSBI), Linux, root filesystem.
+add_custom_target(boot)
+
+# Custom target that represents all test binaries.
+add_custom_target(tests)
+
 add_subdirectory(device)
 
 include(cmake/busybox.cmake)

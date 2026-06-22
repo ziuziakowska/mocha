@@ -52,8 +52,9 @@ function(mocha_uboot OUTPUT_NAME)
       IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${UBOOT_BUILD_NAME}/src/${UBOOT_BUILD_NAME}/u-boot
     )
   add_dependencies(${OUTPUT_NAME} ${UBOOT_BUILD_NAME})
+  add_dependencies(boot ${OUTPUT_NAME})
 endfunction()
 
 mocha_uboot(uboot)
 
-mocha_opensbi_with_payload(uboot)
+mocha_opensbi_with_payload(TARGET uboot)
