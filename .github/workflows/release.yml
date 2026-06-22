@@ -93,11 +93,10 @@ jobs:
       - name: Generate artefacts
         run: |
           cmake -B build/sw -S sw
-
-          for t in hello_world hello_world_verilator; do
-            cmake --build build/sw -j $(nproc) --target $t
-            cmake --install build/sw/ --prefix release --component $t
-          done
+          cmake --build build/sw -j$(nproc)
+          cmake --install build/sw --prefix release --component examples
+          cmake --install build/sw --prefix release --component bootrom
+          cmake --install build/sw --prefix release --component boot
 
           tar -czvf ${{ env.ARTEFACT }} release
 
